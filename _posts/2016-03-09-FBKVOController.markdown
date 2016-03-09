@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 初识 FBKVOController
-date: 2016-02-16 15:32:24.000000000 +09:00
+date: 2016-03-09 18:32:24.000000000 +09:00
 ---
 ###Installation 
 
