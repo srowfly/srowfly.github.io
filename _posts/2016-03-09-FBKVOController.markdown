@@ -11,4 +11,4 @@ date: 2016-03-09 18:32:24.000000000 +09:00
   
 `FBKVOController`的一般用法
    
-![Alt text](/Users/srowfly/Library/Containers/com.tencent.qq/Data/Library/Application Support/QQ/Users/862995745/QQ/Temp.db/D66BF15C-C25F-45D2-9DD6-BED0FAB258B0.png)
+![Alt text](/Users/srowfly/Desktop/D66BF15C-C25F-45D2-9DD6-BED0FAB258B0.jpg)
