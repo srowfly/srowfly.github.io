@@ -1,0 +1,10 @@
+---
+layout: post
+title: lala
+date: 2016-03-15 10:15:24.000000000 +09:00
+---
+``
+
+		的[MGJRouter openURL[NSStringmgj_combineURLWithBaseURL:_entity.link parameters:@{@"acm":[NSString stringWithFormat:@"%@", _entity.acm]}]];
+		
+``
