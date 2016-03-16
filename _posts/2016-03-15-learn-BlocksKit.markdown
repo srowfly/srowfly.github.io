@@ -234,6 +234,7 @@ date: 2016-03-09 21:00:24.000000000 +09:00
 	NSMutableArray *mArr1 = [@[@"a", @"b", @"c.png", @"d.png"] mutableCopy];
     
     [mArr1 bk_performMap:^id(id obj) {
+    //没有以.png结尾的拼接上.png
         return [obj hasSuffix:@".png"] ? obj :[obj stringByAppendingString:@".png"];
     }];
     NSLog(@"bk_performMap: %@", mArr1);
@@ -244,7 +245,7 @@ date: 2016-03-09 21:00:24.000000000 +09:00
     "c.png",
     "d.png"
 	)
-	
+	源码:
 	- (void)bk_performMap:(id (^)(id obj))block {
 	NSParameterAssert(block != nil);
 	NSMutableArray *new = [self mutableCopy];
