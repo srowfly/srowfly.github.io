@@ -6,6 +6,8 @@ date: 2016-03-09 21:00:24.000000000 +09:00
 
 抽时间看了下BlocksKit的部分代码, 了解了下内部实现, 总结一下.
 
+###不可变:
+
 `初始化数组`:
 
 	NSArray *arr = @[@"1a", @"2a", @"3a", @"4a"];
@@ -205,3 +207,59 @@ date: 2016-03-09 21:00:24.000000000 +09:00
 	}
 
 看了下 NSDictionary、NSIndexSet、NSSet、NSOrderedSet 都是这样的用法, 就不一一累述~~先搞这些吧
+
+###续集:
+
+`1`.根据条件移除数组中的元素
+
+	NSMutableArray *mArr = [@[@"a", @"b", @"c", @"d"] mutableCopy];
+	
+	//保留满足条件(return YES)的对象, 不满足移除;
+    [mArr bk_performSelect:^BOOL(id obj) {
+        return [mArr indexOfObject:obj] % 2;
+    }];
+    //留下[b,d];
+    NSLog(@"return YES: %@", mArr);
+    
+    //移除满足条件(return YES)的对象, 不满足保留;
+    [mArr bk_performReject:^BOOL(id obj) {
+        return [mArr indexOfObject:obj] % 2;
+    }];
+    //留下[b];
+    NSLog(@"return NO: %@", mArr);
+    
+`2`.对数组相应对象的处理
+
+	NSMutableArray *mArr1 = [@[@"a", @"b", @"c.png", @"d.png"] mutableCopy];
+    
+    [mArr1 bk_performMap:^id(id obj) {
+        return [obj hasSuffix:@".png"] ? obj :[obj stringByAppendingString:@".png"];
+    }];
+    NSLog(@"bk_performMap: %@", mArr1);
+    //打印结果:
+    2016-03-16 17:32:32.135 TBlockskit[1951:49505] bk_performMap: (
+    "a.png",
+    "b.png",
+    "c.png",
+    "d.png"
+	)
+	
+	- (void)bk_performMap:(id (^)(id obj))block {
+	NSParameterAssert(block != nil);
+	NSMutableArray *new = [self mutableCopy];
+
+	[self enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+		//外部处理为空的创建NSNull对象
+		id value = block(obj) ?: [NSNull null];
+		//处理之后与原obj相同的不变,
+		if ([value isEqual:obj]) return;
+		//不相同的用新对象替换老的
+		new[idx] = value;
+	}];
+	//把数组用new替代
+	[self setArray:new];
+	}
+	
+`然而`.NSDictionary、NSIndexSet、NSSet、NSOrderedSet 也都是这样的用法
+
+##over
