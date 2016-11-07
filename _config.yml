@@ -1,8 +1,8 @@
 # Basic
 title: Srowfly
-subtitle: 行 走 在 孤 风 中
+subtitle: 小小的iOS开发一枚
 welcome_message: <a href="https://github.com/srowfly/srowfly.github.io" target="_blank">Download the theme</a>
-description: 孤独的守望者.
+description: 点点滴滴-共同成长
 creator: <a href="http://onev.cat">@onevcat</a>
 
 url: "http://vno.onevcat.com"
@@ -16,7 +16,7 @@ redcarpet:
   extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "strikethrough", "superscript", tables]
 
 # supported colors: blue, green, purple, red, orange or slate. If you need clear, leave it empty.
-cover_color: red
+cover_color: 
 
 # The blog button should not be removed.
 blog_button:
