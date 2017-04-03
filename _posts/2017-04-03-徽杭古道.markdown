@@ -1,8 +1,6 @@
 ---
 layout: post
-
 title: Just for you - 徽杭古道
-
 date: 2017-04-03 19:32:24.000000000 +09:00
 ---
 
