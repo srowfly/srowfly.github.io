@@ -7,11 +7,11 @@ date: 2016-03-21 19:21:22.000000000 +09:00
 
 对于线程与队列的关系, 每次想起都不甚明了, 找个地方备注一下.
 
-### 1 GCD简介
+### 1、GCD简介
 
 GCD(Grand Central Dispatch),是苹果提供的一个解决多线程开发的解决方案。GCD会自动管理线程的生命周期（创建线程，调度任务，销毁线程），完全不需要我们管理，我们只需要告诉干什么就行.
 
-### 2 创建任务队列
+### 2、创建任务队列
 
 GCD中的队列主要分两种。
 
@@ -19,13 +19,13 @@ GCD中的队列主要分两种。
  * 串行队列：任务按顺序依次执行。
  * 系统默认有一个和主线程绑定的串行队列，还有一个全局的并发队列。这两个队列都可以通过响应的方法来获得。
 
-#### 2.1 获得主线程的串行队列
+#### 2.1、获得主线程的串行队列
 
 调用这个方法获取主线程队列时，该队列是由主线程来自动创建的。
 
 	dispatch_queue_t mainQueue = dispatch_get_main_queue();
 	
-#### 2.2 获得全局的并发队列
+#### 2.2、获得全局的并发队列
 
 获取全局并发队列的方法中有两个参数，第二个参数暂时没有使用，默认传值0就好。第一个参数表示队列的优先级，其中优先级主要分为4种。
 
@@ -36,7 +36,7 @@ GCD中的队列主要分两种。
 
 		dispatch_queue_t globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 		
-#### 2.3 创建自定义的队列
+#### 2.3、创建自定义的队列
 
 创建自定义的队列主要有两种，一种是串行队列，一种是并行队列。在创建自定义队列时会需要传两个参数，第一个为队列的名称，第二个为表示队列类型的常量（串行还是并行）。
 
@@ -48,7 +48,7 @@ GCD中的队列主要分两种。
 	//并行队列
     dispatch_queue_t concurrentQueue = dispatch_queue_create("com.lysongzi.concurrent", DISPATCH_QUEUE_CONCURRENT);
     
-### 3 同步&异步
+### 3、同步&异步
 
 创建好队列, 然后把任务添加到队列中, 这里牵涉到同步或者异步两种方式
 
@@ -180,5 +180,5 @@ GCD中的队列主要分两种。
 		
 参考资料
 
-* 1.[GCD实践——串行队列/并发队列与iOS多线程详解](http://blog.csdn.net/CHENYUFENG1991/article/details/49332547)
-* 2.[iOS-多线程编程学习之GCD——串行队列和并发队列](http://blog.csdn.net/linyousong/article/details/50753959)
+* [GCD实践——串行队列/并发队列与iOS多线程详解](http://blog.csdn.net/CHENYUFENG1991/article/details/49332547)
+* [iOS-多线程编程学习之GCD——串行队列和并发队列](http://blog.csdn.net/linyousong/article/details/50753959)
