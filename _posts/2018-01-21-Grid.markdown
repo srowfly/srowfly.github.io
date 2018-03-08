@@ -23,10 +23,10 @@ date: 2018-01-21 19:21:22.000000000 +09:00
   
   在此基础上, 你可以给行列进行命名(可以给出两个名字), 用中括号表示
   
-	  		.container {
-	  			grid-template-columns: [first] 40px [line2] 50px [line3] auto [col4-start] 50px [five] 40px [end];
-	  			grid-template-rows: [row1-start] 25% [row1-end row2-start] 100px [third-line] auto [last-line];
-			}
+	  	.container {
+	  		grid-template-columns: [first] 40px [line2] 50px [line3] auto [col4-start] 50px [five] 40px [end];
+	  		grid-template-rows: [row1-start] 25% [row1-end row2-start] 100px [third-line] auto [last-line];
+		}
 		
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-names.png)
 	
