@@ -30,29 +30,29 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 		
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-names.png)
 	
-   如果定义了重复的部分, 可以使用repeat()进行简化
-   
-		.container {
-			grid-template-columns: repeat(3, 20px [col-start]) 5%;
-		}
-		相当于:
-		.container {
-			grid-template-columns: 20px [col-start] 20px [col-start] 20px [col-start] 5%;
-		}
+如果定义了重复的部分, 可以使用repeat()进行简化
+
+	.container {
+		grid-template-columns: repeat(3, 20px [col-start]) 5%;
+	}
+	相当于:
+	.container {
+		grid-template-columns: 20px [col-start] 20px [col-start] 20px [col-start] 5%;
+	}
 		
-   **fr** 为网格容器自由空间的一部分,举例说明:
+**fr** 为网格容器自由空间的一部分,举例说明:
 	
-		.container {
-			grid-template-columns: 1fr 1fr 1fr;
-		}
-		每个项目设置为容器宽度的三分之一
+	.container {
+		grid-template-columns: 1fr 1fr 1fr;
+	}
+	每个项目设置为容器宽度的三分之一
+	
+	*************
 		
-		*************
-		
-		.container {
-			grid-template-columns: 1fr 50px 1fr 1fr;
-		}
-		1fr 项目占(容器宽度-50px)的三分之一
+	.container {
+		grid-template-columns: 1fr 50px 1fr 1fr;
+	}
+	1fr 项目占(容器宽度-50px)的三分之一
   	
 ### 2. grid-template-areas
 
@@ -62,32 +62,32 @@ date: 2018-01-21 19:21:22.000000000 +09:00
   *  . 空格网格
   *  none 没有定义的区域
   
-			.container {
-			  		grid-template-areas: "<grid-area-name> | . | none | ..."
+		.container {
+			grid-template-areas: "<grid-area-name> | . | none | ..."
 			    		"...";
-			}		
-			例子:
-			.item-a {
-		  		grid-area: header;
-			}
-			.item-b {
-		  		grid-area: main;
-			}
-			.item-c {
-		 		grid-area: sidebar;
-			}
-			.item-d {
-				grid-area: footer;
-			}
+		}		
+		例子:
+		.item-a {
+			grid-area: header;
+		}
+		.item-b {
+			grid-area: main;
+		}
+		.item-c {
+		 	grid-area: sidebar;
+		}
+		.item-d {
+			grid-area: footer;
+		}
 		
-			.container {
-		  		grid-template-columns: 50px 50px 50px 50px;
-		 		grid-template-rows: auto;
-		  		grid-template-areas: 
-		    		"header header header header"
-		    		"main main . sidebar"
-		    		"footer footer footer footer";
-			}
+		.container {
+		  	grid-template-columns: 50px 50px 50px 50px;
+		 	grid-template-rows: auto;
+		  	grid-template-areas: 
+		    	"header header header header"
+		    	"main main . sidebar"
+		    	"footer footer footer footer";
+		}
 		
 布局对应的展示:
 
@@ -241,7 +241,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 
 ****
 
-	两头是中间的一般
+	两头是中间的一半
 	.container {
 		justify-content: space-around;
 	}
@@ -474,7 +474,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 * < row-start > / < column-start > / < row-end > / < column-end > , 可以是数字或者名称.
 
 		.item-d {
-		  	grid-area: header
+			grid-area: header
 		}
 		.item-d {
 			grid-area: 1 / col4-start / last-line / 6
