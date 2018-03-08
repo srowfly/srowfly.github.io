@@ -37,22 +37,22 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 		}
 		相当于:
 		.container {
-  			grid-template-columns: 20px [col-start] 20px [col-start] 20px [col-start] 5%;
+			grid-template-columns: 20px [col-start] 20px [col-start] 20px [col-start] 5%;
 		}
 		
    **fr** 为网格容器自由空间的一部分,举例说明:
 	
 		.container {
-  			grid-template-columns: 1fr 1fr 1fr;
+			grid-template-columns: 1fr 1fr 1fr;
 		}
 		每个项目设置为容器宽度的三分之一
 		
 		*************
 		
 		.container {
-  			grid-template-columns: 1fr 50px 1fr 1fr;
+			grid-template-columns: 1fr 50px 1fr 1fr;
 		}
-  		1fr 项目占(容器宽度-50px)的三分之一
+		1fr 项目占(容器宽度-50px)的三分之一
   	
 ### 2. grid-template-areas
 
@@ -98,9 +98,9 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 一个声明里面设置`grid-template-rows`，`grid-template-columns`& `grid-template-areas`.
 
 	.container {
-  		grid-template:
+		grid-template:
 			[row1-start] "header header header" 25px [row1-end]
-		    [row2-start] "footer footer footer" 25px [row2-end]
+			[row2-start] "footer footer footer" 25px [row2-end]
 		    / auto 50px auto;
 	}
 	相当于:
@@ -126,9 +126,9 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 	}
 	有一种简短的写法, 相当于:
 	.container {
-  		grid-template-columns: 100px 50px 100px;
-  		grid-template-rows: 80px auto 80px; 
-  		grid-gap: 10px 15px;
+		grid-template-columns: 100px 50px 100px;
+		grid-template-rows: 80px auto 80px; 
+		grid-gap: 10px 15px;
 	}
 	
 展示效果如下:
@@ -164,7 +164,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 *********
 
 	.container {
-  		justify-items: stretch;
+		justify-items: stretch;
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-items-stretch.png)
@@ -176,7 +176,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 沿着列轴对其网格内的内容:
 
 	.container {
-  		align-items: start;
+		align-items: start;
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-items-start.png)
@@ -210,7 +210,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 有时网格总大小可能小于网格容器的大小, 此时就需要设置容器内总的网格的对齐方式, 此属性沿着行轴对齐网格
 
 	.container {
-  		justify-content: start;
+		justify-content: start;
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-start.png)
@@ -218,15 +218,15 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 *****
 
 	.container {
-  		justify-content: center;
+		justify-content: center;
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-center.png)
 
 ****
 
-	.container {
-  		justify-content: end;
+	.container {	
+		justify-content: end;
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-end.png)
@@ -234,7 +234,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 ****
 
 	.container {
-  		justify-content: stretch;
+		justify-content: stretch;
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-stretch.png)
@@ -243,7 +243,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 
 	两头是中间的一般
 	.container {
-  		justify-content: space-around;
+		justify-content: space-around;
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-space-around.png)
@@ -252,7 +252,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 
 	两头紧贴边缘
 	.container {
-  		justify-content: space-between;	
+		justify-content: space-between;
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-space-between.png)
@@ -261,7 +261,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 
 	间隙一样
 	.container {
-  		justify-content: space-evenly;	
+		justify-content: space-evenly;	
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-space-evenly.png)
@@ -333,8 +333,8 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 默认定义的网格如下
 
 	.container {
-  		grid-template-columns: 60px 60px;
-  		grid-template-rows: 90px 90px
+		grid-template-columns: 60px 60px;
+		grid-template-rows: 90px 90px
 	}
 	
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-auto.png)
@@ -356,7 +356,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 所以我们可以指定隐式轨道的宽度:
 
 	.container {
-  		grid-auto-columns: 60px;
+		grid-auto-columns: 60px;
 	}
 展示效果如下: 
 
@@ -477,7 +477,7 @@ date: 2018-01-21 19:21:22.000000000 +09:00
 		  	grid-area: header
 		}
 		.item-d {
-  			grid-area: 1 / col4-start / last-line / 6
+			grid-area: 1 / col4-start / last-line / 6
 		}
 		
 ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-start-end-d.png)
