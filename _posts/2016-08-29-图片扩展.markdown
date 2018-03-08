@@ -1,0 +1,94 @@
+---
+layout: post
+title: iOS背景图片伸展-Button
+date: 2016-08-29 18:07:24.000000000 +09:00
+---
+
+在一个iOS app里面, 有很多按钮会有相同的背景图片, 但是尺寸不一样. 不对图片做处理的话,展示出来的效果往往不尽如人意,没有圆角,或者失真之类的,下面我们对同一张图片做处理以适应不同尺寸的按钮.
+	
+iOS5中提供了一个新的UIImage方法，resizableImageWithCapInsets:，可以将图片转换为以某一偏移值为偏移的可伸缩图像（偏移值内的图像将不被拉伸或压缩）。
+
+下面我们针对不同的UIEdgeInsets,看UI的具体展示:
+
+原始图片:
+
+![Alt text](/assets/images/purple_button.png)
+
+期望效果:
+
+![Alt text](/assets/images/purple_button_h_v_result.png)
+
+	typedef struct { 
+  	 	CGFloat top, left, bottom, right;
+	} UIEdgeInsets;
+	
+##Replicating Everything
+###UIEdgeInsetsMake(0, 0, 0, 0):
+
+
+	- (void)configureButton
+	{
+    	UIEdgeInsets edgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+    	UIImage *backgroundButtonImage = [[UIImage imageNamed:@"purple_button.png"]resizableImageWithCapInsets:edgeInsets];
+    	[self.purpleButton setBackgroundImage:backgroundButtonImage
+                                 forState:UIControlStateNormal];
+	}
+
+图片复制了一遍又一遍, 最后展示出来的结果是这样的:	
+
+![Alt text](/assets/images/purple_button_result.png)
+
+##Scaling Vertically
+
+![Alt text](/assets/images/purple_button_vertically.png)
+
+###UIEdgeInsetsMake(0, 8, 0, 8):
+
+	- (void)configureButton
+	{
+    	UIEdgeInsets edgeInsets = UIEdgeInsetsMake(0, 8, 0, 8);
+    	UIImage *backgroundButtonImage = [[UIImage imageNamed:@"purple_button.png"]resizableImageWithCapInsets:edgeInsets];
+    	[self.purpleButton setBackgroundImage:backgroundButtonImage
+                                 forState:UIControlStateNormal];
+	}
+
+保持左右不变,中间区域拉伸, 结果如下图:
+
+![Alt text](/assets/images/purple_button_vertically_result.png)
+
+##Scaling Horizontally
+
+![Alt text](/assets/images/purple_button_horizontal.png)
+
+###UIEdgeInsetsMake(8, 0, 8, 0):
+
+	- (void)configureButton
+	{
+    	UIEdgeInsets edgeInsets = UIEdgeInsetsMake(8, 0, 8, 0);
+    	UIImage *backgroundButtonImage = [[UIImage imageNamed:@"purple_button.png"]resizableImageWithCapInsets:edgeInsets];
+    	[self.purpleButton setBackgroundImage:backgroundButtonImage
+                                 forState:UIControlStateNormal];
+	}
+
+保持上下两块区域不变,中间区域拉伸, 结果如下图:
+
+![Alt text](/assets/images/purple_button_horizontal_result.png)
+
+##Scaling Both Ways
+
+![Alt text](/assets/images/purple_button_h_v.png)
+
+###UIEdgeInsetsMake(8, 8, 8, 8):
+
+	- (void)configureButton
+	{
+    	UIEdgeInsets edgeInsets = UIEdgeInsetsMake(8, 8, 8, 8);
+    	UIImage *backgroundButtonImage = [[UIImage imageNamed:@"purple_button.png"]resizableImageWithCapInsets:edgeInsets];
+    	[self.purpleButton setBackgroundImage:backgroundButtonImage
+                                 forState:UIControlStateNormal];
+	}
+保持四角不变,中间区域拉伸, 结果如下图:
+
+![Alt text](/assets/images/purple_button_h_v_result.png)
+
+Now, 完美解决了同一张图片适配不同尺寸按钮的问题. 同时, 当你需要保持四个圆角的样式, 只需要一张四个角一样, 很小的一张图就可以解决了.

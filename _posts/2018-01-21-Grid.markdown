@@ -1,0 +1,462 @@
+---
+layout: post
+title: Grid
+
+date: 2018-01-21 19:21:22.000000000 +09:00
+---
+
+最近学习了下网格布局方式Grid. 翻译整理如下.
+
+##Grid -- 父级容器
+
+###1.grid-template-columns 定义列  grid-template-rows 定义行
+* 1.行列的格式
+
+		.container {
+  			grid-template-columns: <track-size> ... | <line-name> <track-size> ...;
+	  		grid-template-rows: <track-size> ... | <line-name> <track-size> ...;
+  		}
+  	
+  定义行列的时候可以给出具体的数值, 如果设置为auto,则会自动分配;
+  
+  ![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-numbers.png)
+  
+  在此基础上, 你可以给行列进行命名(可以给出两个名字), 用中括号表示
+  
+  		.container {
+  			grid-template-columns: [first] 40px [line2] 50px [line3] auto [col4-start] 50px [five] 40px [end];
+  			grid-template-rows: [row1-start] 25% [row1-end row2-start] 100px [third-line] auto [last-line];
+		}
+	![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-names.png)
+	
+   如果定义了重复的部分, 可以使用repeat()进行简化
+   
+		.container {
+			grid-template-columns: repeat(3, 20px [col-start]) 5%;
+		}
+		相当于:
+		.container {
+  			grid-template-columns: 20px [col-start] 20px [col-start] 20px [col-start] 5%;
+		}
+		
+   **fr** 为网格容器自由空间的一部分,举例说明:
+	
+		.container {
+  			grid-template-columns: 1fr 1fr 1fr;
+		}
+		每个项目设置为容器宽度的三分之一
+		
+		*************
+		
+		.container {
+  			grid-template-columns: 1fr 50px 1fr 1fr;
+		}
+  		1fr 项目占(容器宽度-50px)的三分之一
+  	
+###2. grid-template-areas
+
+  通过 **grid-area** 属性置顶网格区域的名称来定义网格模板, 重复网格区域的名称会导致内容跨越这些单元格(就是一个view占据多个单元格的位置)
+  
+  *  < grid-area-name > 网格区域的名称
+  *  . 空格网格
+  *  none 没有定义的区域
+  
+ 		.container {
+  			grid-template-areas: "<grid-area-name> | . | none | ..."
+    		"...";
+		}
+	例子:
+	
+		.item-a {
+	  		grid-area: header;
+		}
+		.item-b {
+	  		grid-area: main;
+		}
+		.item-c {
+	 		grid-area: sidebar;
+		}
+		.item-d {
+			grid-area: footer;
+		}
+	
+		.container {
+	  		grid-template-columns: 50px 50px 50px 50px;
+	 		grid-template-rows: auto;
+	  		grid-template-areas: 
+	    		"header header header header"
+	    		"main main . sidebar"
+	    		"footer footer footer footer";
+		}
+布局对应的展示:
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-template-areas.png)
+
+###grid-template
+一个声明里面设置`grid-template-rows`，`grid-template-columns`& `grid-template-areas`.
+
+	.container {
+  		grid-template:
+			[row1-start] "header header header" 25px [row1-end]
+		    [row2-start] "footer footer footer" 25px [row2-end]
+		    / auto 50px auto;
+	}
+	相当于:
+	.container {
+		grid-template-rows: [row1-start] 25px [row1-end row2-start] 25px [row2-end];
+		grid-template-columns: auto 50px auto;
+		grid-template-areas: 
+		  	"header header header" 
+		  	"footer footer footer";
+	}
+	
+由于grid-template不会重置隐式网格属性（grid-auto-columns，grid-auto-rows和grid-auto-flow），但是这可能是您在大多数情况下所要做的，所以建议使用grid属性而不是grid-template。
+
+###grid-column-gap & grid-row-gap
+
+指定网格线的大小, 就是网格之间的间距
+
+	.container {
+	  grid-template-columns: 100px 50px 100px;
+	  grid-template-rows: 80px auto 80px; 
+	  grid-column-gap: 10px;
+	  grid-row-gap: 15px;
+	}
+	有一种简短的写法, 相当于:
+	.container {
+  		grid-template-columns: 100px 50px 100px;
+  		grid-template-rows: 80px auto 80px; 
+  		grid-gap: 10px 15px;
+	}
+展示效果如下:
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-column-row-gap.png)
+
+###justify-items
+
+沿着行轴对其网格内的内容:
+
+	.container {
+	  	justify-items: start;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-items-start.png)
+*********
+	.container {
+	  	justify-items: center;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-items-center.png)
+*********
+	.container {
+	  	justify-items: end;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-items-end.png)
+*********
+	.container {
+  		justify-items: stretch;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-items-stretch.png)
+
+注: 可以通过justify-self设置个别网格项目属性;
+
+###align-items
+
+沿着列轴对其网格内的内容:
+
+	.container {
+  		align-items: start;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-items-start.png)
+*********
+	.container {
+	  align-items: center;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-items-center.png)
+*********
+	.container {
+	  align-items: end;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-items-end.png)
+*********
+	.container {
+	  align-items: stretch;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-items-stretch.png)
+
+###justify-content
+
+有时网格总大小可能小于网格容器的大小, 此时就需要设置容器内总的网格的对齐方式, 此属性沿着行轴对齐网格
+
+	.container {
+  		justify-content: start;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-start.png)
+*****
+	.container {
+  		justify-content: center;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-center.png)
+****
+	.container {
+  		justify-content: end;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-end.png)
+****
+	.container {
+  		justify-content: stretch;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-stretch.png)
+****
+	两头是中间的一般
+	.container {
+  		justify-content: space-around;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-space-around.png)
+****	
+	两头紧贴边缘
+	.container {
+  		justify-content: space-between;	
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-space-between.png)
+****
+	间隙一样
+	.container {
+  		justify-content: space-evenly;	
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-content-space-evenly.png)
+
+###align-content
+
+有时网格总大小可能小于网格容器的大小, 此时就需要设置容器内总的网格的对齐方式, 此属性沿着列轴对齐网格
+
+	.container {
+	  align-content: start;	
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-content-start.png)
+****
+	.container {
+	  align-content: center;	
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-content-center.png)
+****
+	.container {
+	  align-content: end;	
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-content-end.png)
+****
+	.container {
+	  align-content: stretch;	
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-content-stretch.png)
+****
+	.container {
+	  align-content: space-around;	
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-content-space-around.png)
+
+****
+	.container {
+	  align-content: space-between;	
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-content-space-between.png)
+****
+	.container {
+	  align-content: space-evenly;	
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-content-space-evenly.png)
+
+### grid-auto-columns & grid-auto-rows
+
+指定自动生成的网格(又名隐式网格)大小, 如果定位的行或列超出定义的网格范围, 则会创建隐式网格
+
+例子:
+
+默认定义的网格如下
+
+	.container {
+  		grid-template-columns: 60px 60px;
+  		grid-template-rows: 90px 90px
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-auto.png)
+
+如果定位了如下网格:
+
+	.item-a {
+	  grid-column: 1 / 2;
+	  grid-row: 2 / 3;
+	}
+	.item-b {
+	  grid-column: 5 / 6;
+	  grid-row: 2 / 3;
+	}		
+不设置隐式轨道的宽度的话, 会设置宽度为0的隐式轨道来填补空白,如下:
+
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/implicit-tracks.png)
+
+所以我们可以指定隐式轨道的宽度:
+
+	.container {
+  		grid-auto-columns: 60px;
+	}
+展示效果如下: 
+
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/implicit-tracks-with-widths.png)
+
+###grid-auto-flow
+
+如果没有明确放置在网格上的网格项目布局, 则自动算法会自动放置这些项目. 该属性控制自动布局算法的工作原理
+
+	row - 按行依次排布
+	column - 按列依次排布
+	dense - 在网格中尽早填充剩余空格
+
+举例说明:
+
+定义了如下HTML:
+
+	<section class="container">
+	  <div class="item-a">item-a</div>
+	  <div class="item-b">item-b</div>
+	  <div class="item-c">item-c</div>
+	  <div class="item-d">item-d</div>
+	  <div class="item-e">item-e</div>
+	</section>
+
+定义一个两行五列的网格, 并且设置`grid-auto-flow`为 row
+
+	.container {
+	  display: grid;
+	  grid-template-columns: 60px 60px 60px 60px 60px;
+	  grid-template-rows: 30px 30px;
+	  grid-auto-flow: row;
+	}
+	
+将item放置在其中两个指定点:
+
+	.item-a {
+	  grid-column: 1;
+	  grid-row: 1 / 3;
+	}
+	.item-e {
+	  grid-column: 5;
+	  grid-row: 1 / 3;
+	}
+因为我们设置了`grid-auto-flow`为`row`, 网格将会按以下方式排布
+
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-auto-flow-row.png)
+****
+当然. 如果设置了`grid-auto-flow`为`column`, 则会按下面的方式排布
+
+	.container {
+	  display: grid;
+	  grid-template-columns: 60px 60px 60px 60px 60px;
+	  grid-template-rows: 30px 30px;
+	  grid-auto-flow: row;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-auto-flow-column.png)
+
+
+##Grid -- 子级网格
+
+###grid-column-start & grid-column-end & grid-row-start & grid-row-end
+
+通过特定的网格线来确定网格内网格的位置. `grid-column-start`/ `grid-column-end`是列的开始跟结束位置，`grid-row-start`/ `grid-row-end`是行开始跟结束的位置.
+
+ * **< line >** 可以是数字也可以是名称来引用一个网格线
+ * **span< number >** 项目所跨越的网格线的数量
+ * **span< name >** 项目将跨越到的网格线的名称
+ * **auto** 自动或默认跨度
+ 
+例子如下:
+
+	.item-a {
+	  grid-column-start: 2;
+	  grid-column-end: five;
+	  grid-row-start: row1-start
+	  grid-row-end: 3
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-start-end-a.png)
+****
+	.item-b {
+	  grid-column-start: 1;
+	  grid-column-end: span col4-start;
+	  grid-row-start: 2
+	  grid-row-end: span 2
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/11/grid-start-end-b.png)
+
+如果没有`grid-column-end` / `grid-row-end` 声明, 该项目将跨越1个网格线
+
+项目可以相互重叠。您可以使用它z-index来控制其堆叠顺序.
+
+###grid-column & grid-row
+
+分别对应的为 start / end, 可接受number/name/span
+
+	.item-c {
+	  grid-column: 3 / span 2;
+	  grid-row: third-line / 4;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-start-end-c.png)
+
+###grid-area
+
+* 名称对应的区域
+* < row-start > / < column-start > / < row-end > / < column-end > , 可以是数字或者名称.
+
+		.item-d {
+		  	grid-area: header
+		}
+		.item-d {
+  			grid-area: 1 / col4-start / last-line / 6
+		}
+		
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-start-end-d.png)
+
+###justify-self
+
+沿着行轴对其网格内的内容
+	
+	.item-a {
+	  justify-self: start;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-self-start.png)
+****
+	.item-a {
+	  justify-self: center;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-self-center.png)
+****
+	.item-a {
+	  justify-self: end;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-self-end.png)
+****
+	.item-a {
+	  justify-self: stretch;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-justify-self-stretch.png)
+
+###align-self
+
+沿着列轴对其网格内的内容
+	
+	.item-a {
+	  align-self: start;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-self-start.png)
+****
+	.item-a {
+	  align-self: center;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-self-center.png)
+****
+	.item-a {
+	  align-self: end;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-self-end.png)
+****
+	.item-a {
+	  align-self: stretch;
+	}
+![](https://cdn.css-tricks.com/wp-content/uploads/2016/03/grid-align-self-stretch.png)
+
+
+原文 : [Grid布局](https://css-tricks.com/snippets/css/complete-guide-grid/#prop-grid-template-columns-rows)

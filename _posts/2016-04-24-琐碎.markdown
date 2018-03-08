@@ -1,0 +1,66 @@
+---
+layout: post
+title: 日常琐碎知识点
+date: 2016-04-24 16:32:24.000000000 +09:00
+---
+最近在一篇博客里面看到unicode编码转汉字的方法, 记录下来以便以后使用
+
+	- (NSString *)replaceUnicode:(NSString *)unicodeStr {
+   		 NSString *tempStr1 = [unicodeStr 	stringByReplacingOccurrencesOfString:@"\\u"withString:@"\\U"];
+   		 NSString *tempStr2 = [tempStr1 stringByReplacingOccurrencesOfString:@"\""withString:@"\\\""];
+   		 NSString *tempStr3 = [[@"\"" stringByAppendingString:tempStr2]stringByAppendingString:@"\""];
+    	 NSData *tempData = [tempStr3 dataUsingEncoding:NSUTF8StringEncoding];
+   		 NSString* returnStr = [NSPropertyListSerialization propertyListFromData:tempData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:NULL];
+    // "Use propertyListWithData:options:format:error: instead." 把data转成string的方法已经被该方法替换
+    	return [returnStr stringByReplacingOccurrencesOfString:@"\\r\\n"withString:@"\n"];
+	}	
+
+
+	NSString *str = [self replaceUnicode:@"\\u4fdd\\u5b58\\u6a21\\u5f0f"];
+    NSLog(@"----%@", str); //---保存模式
+    
+    
+判断字符串全部是汉字或者包含汉字的方法, 为了方便调用, 在 category 中实现 
+
+
+	//1.利用NSPredicate过滤数据库,按照匹配规则判断是否匹配 (全是汉字)
+	- (BOOL)isAllChinese {
+    	NSString *match = @"(^[\u4e00-\u9fa5]+$)";
+    	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF matches %@", match];
+    	return [predicate evaluateWithObject:self];
+	}
+	
+	//2.包含汉字: 遍历字符串中的字符, 汉字的Unicode范围为0x4e00~0x9fa5,只要字符串中含有此范围内的, 则条件成立;
+	- (BOOL)containChinese {
+    for(int i=0; i< [self length];i++) {
+        int a =[self characterAtIndex:i];
+        if( a >0x4e00&& a <0x9fa5){
+            return YES;
+        }
+    }
+    return NO;
+	}
+
+平时经常用到的正则表达式, 这里总结一发:
+
+1.由数字、26个英文字母或下划线组成的字符串
+	
+	^\w+$
+	
+
+2.邮箱地址是否合法
+	
+	[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?
+	
+3.校验身份证号
+
+	15位身份证号:
+				^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$
+	18位身份证号:
+				^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$
+				
+4.校验日期格式: yyyy-mm-dd
+
+	^(?:(?!0000)[0-9]{4}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)$
+	
+平时在写正则表达式的时候, 书写的正确性是最重要的, 这里推荐一个正则表达式在线测试工具:[regex101](https://regex101.com/#javascript),希望对大家有所帮助~

@@ -1,0 +1,290 @@
+---
+layout: post
+title: hotfix
+date: 2016-07-08 12:02:24.000000000 +09:00
+---
+最近学习了下hotfix的时候oc转js的写法, 记录下...
+
+1.require
+
+	UIView *view = [[UIView alloc] init];
+	// -> js
+
+	require('UIView')
+	var view = UIView.alloc().init();
+	//或者
+	var view = require('UIView').alloc().init();
+
+2.setter or getter
+
+	view.backgroundColor = [UIColor redColor];
+	// -> js
+
+	view.setBackgroundColor(UIColor.redColor());
+	var color = view.backgroundColor();
+
+3.方法调用时方法名转换及参数
+
+	[super sortByIndex:index sortState:sortState];
+	// -> js
+	super.sortByIndex_sortState(index, sortState);
+
+
+	NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:1];
+
+	var indexPath = require('NSIndexPath').indexPathForRow_inSection(0, 1);
+
+4.最常用的方法: 方法覆盖
+
+	- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:	(NSIndexPath *)indexPath{}
+
+	defineClass("JPTableViewController", {
+ 	 tableView_didSelectRowAtIndexPath: function(tableView, indexPath) {
+ 	   ...
+ 	 },
+	})
+
+	若是方法中有下划线, 就使用双下划线
+
+5.在方法名前加 ORIG 即可调用未覆盖前的 OC 原方法, 覆盖分类方法一致
+
+	- (void)viewDidLoad {}
+
+	defineClass("MarketsRevisionViewController", {
+    	viewDidLoad: function(){
+    		//给属性赋初始值, 然后覆盖viewDidLoad
+        	self.setMbook("");
+        	self.ORIGviewDidLoad();
+    	}
+	});
+
+6.获取并修改oc的property
+
+	@interface UIViewController
+	@property (nonatomic) NSArray *data;
+	@end
+
+	defineClass("UIViewController", {
+		viewDidLoad:function() {
+			var data = self.data();
+			//把data数组转化为js的data, 然后加入新元素
+			self.setData(data.toJS().push("jason"));
+		},
+	})
+
+7.获取并改变私有成员变量
+
+	@implementation UIViewController {
+		NSArray *_data;
+	}
+	@end
+
+	defineClass("UIViewController", {
+		viewDidLoad: function(){
+			//采取valurForKey的方式
+			var data = self.valueForKey("_data");
+			self.setValue_forKey(["JSPatch"], "_data")
+		},
+	})
+
+8.protocol js中实现oc协议的写法
+
+	defineClass("ViewController: UIViewController <UIAlertViewDelegate>", {
+		viewDidAppear:function(){
+		var alertView = require('UIAlertView').alloc().initWithTitle_message_delegate_cancleButtonTitle_otherButtonTitles(
+				"Alert", self.dataSource().objectAtIndex(indexPath.row()), self, "ok", null
+			)
+		alertView.show();
+	}
+		alertView_clickButtonAtIndex:function(alertView, buttonIndex){
+		console.log("clickIndex" + buttonIndex)
+	}
+})
+
+9.Struct 结构体 JSPatch原生支持四种类型 CGRect CGPoint CGSize NSRange
+
+	UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+	view.center = CGPointMake(50, 50);
+	[view sizeThatFits:CGSizeMake:(30, 30)];
+
+	CGFloat x = view.frame.origin.x;
+
+	NSRange range = NSMakeRange(0, 2);
+
+	//-> js
+
+	var view = UIView.alloc().initWithFrame({0, 0 , 100, 100});
+	view.setCenter({x:50, y:50});
+	view.sizeThatFits({width:100, height:100});
+
+	var x = view.frame().x;
+	var range = {location:0, length:2};
+
+10.Selector 选择器
+
+	UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+
+	[button addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventsTouchUpInside];
+
+	// -> js
+
+	var button = UIButton.buttonWithType(0);
+	button.addTarget_action_forControlEvents(self, "buttonClick:", 1<<6);
+
+11.nil  OC中的nil在js中用null或者undefined代替, OC中的null在js中用nsnull代替
+
+	@implementation
+	+ (BOOL)testNull:(NSNull *)null {
+	return [null isKindof:[NSNull class]];
+	}
+	@end
+
+	//-> js
+
+	require('UIViewController').testNull(nsnull); return YES(true), 1
+	require('UIViewController').testNull(null); return NO(false), 0;
+
+	->>>在JS里面判断为空要判断false
+
+	var url = 'www.baidu.com';
+	var data = NSData.dataWithContentsOfURL(NSURL.urlWithString(url));
+
+	if (data != null) {}; //注: js中不能这样判断空
+	正确如下:
+	if (!data){}; 
+
+12.NSArray / NSString / NSDictionary
+
+	@implementation
+	+ (NSArray *)arr {
+		return [@[@"a", @"b"] mutableCopy];
+	}
+	@end
+
+	// -> js
+	//不转为对应的js类型
+	require ("UIViewController")
+	var string = UIViewController.data().objectAtIndex(1);
+	string.appendString("hotfix")
+	console.log(string)
+
+	//转为对应的js类型
+
+	var data = require('UIViewController').data.toJS();
+	data.push("hotfix");
+
+13.Block 在js中block的写法, 先使用 block(paramTypes, function) 接口包装
+
+	@implementation 
+	+ (void)request:(void(^)(NSString *content, BOOL success))callback{
+		callback(@"I'm content", YES);
+	}
+	@end
+
+	//-> js
+
+	require("UIViewController").request(block("NSString *, BOOL", 	function(content, success){
+		if (success) log(content);
+	}))
+
+	在block中无法直接调用self, 需要用临时变量保存
+	defineClass("UIViewController", {
+		viewDidLoad:function(){
+			var weSelf = self;
+			require("UIView").callback(block(function(){
+				weSelf.doSomething();
+			}));
+		}
+	})
+
+14.__weak / __strong  js中声明一个weak属性的做法为 __weak(), 在oc中为了避免循环引用, 经常会weak属性;
+
+	- (void)test {
+		__weak id weakSelf = self;
+		[self setBlock:^(){
+			[weakSelf haha];
+		}]
+	}
+	// -> js
+
+	var weakSelf = __weak(self);
+	self.setBlock(block(function(){
+		weakSelf.haha();
+	}))
+
+	在在使用 weakSelf 的时候在block内部变为strong属性, 写法一致
+
+	var weakSelf = __weak(self);
+	self.setBlock(block(function(){
+		var strongSelf = __strong(weakSelf);
+		strongSelf.haha();
+	}))
+
+15.GCD js在线程的调用中比较简单
+
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+  	// do something
+	});
+	dispatch_async(dispatch_get_main_queue(), ^{
+  	// do something
+	});
+
+	// -> js
+
+	dispatch_after(1.0, function(){
+		.....
+	})
+	dispatch_async(function(){
+		......
+	})
+
+16.常量、枚举、全局变量 在 js 中的使用
+
+	OC中的常量/枚举不能直接在JS中调用, 可以用具体值代替
+
+	[btn addTarget:self action:@selector(handleBtn) forControlEvents:UIControlEventTouchUpInside];
+	//-> js
+	btn.addTarget_action_forControlEvents(self, "handleBtn", 1 << 6);
+	//重新定义也可以
+	var UIControlEventTouchUpInside  = 1 << 6;
+	btn.addTarget_action_forControlEvents(self, "handleBtn", UIControlEventTouchUpInside);
+
+	像 NSForegroundColorAttributeName 这样的静态字符串变量, 可以打印出来值
+
+	static 全局变量无法在 JS 上获取到，需要携程类方法或实例方法返回
+	static NSString *name;
+	@implementation UIViewController
+	+ (NSString *)name {
+  		return name;
+	}
+	@end
+
+	var name = UIViewController.name();
+
+基本可以解决日常需要
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

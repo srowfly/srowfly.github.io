@@ -1,0 +1,184 @@
+---
+layout: post
+title: 线程与队列的关系
+
+date: 2016-03-21 19:21:22.000000000 +09:00
+---
+
+对于线程与队列的关系, 每次想起都不甚明了, 找个地方备注一下.
+
+### 1、GCD简介
+
+GCD(Grand Central Dispatch),是苹果提供的一个解决多线程开发的解决方案。GCD会自动管理线程的生命周期（创建线程，调度任务，销毁线程），完全不需要我们管理，我们只需要告诉干什么就行.
+
+### 2、创建任务队列
+
+GCD中的队列主要分两种。
+
+ * 并发队列：允许多个任务同时执行。
+ * 串行队列：任务按顺序依次执行。
+ * 系统默认有一个和主线程绑定的串行队列，还有一个全局的并发队列。这两个队列都可以通过响应的方法来获得。
+
+#### 2.1、获得主线程的串行队列
+
+调用这个方法获取主线程队列时，该队列是由主线程来自动创建的。
+
+	dispatch_queue_t mainQueue = dispatch_get_main_queue();
+	
+#### 2.2、获得全局的并发队列
+
+获取全局并发队列的方法中有两个参数，第二个参数暂时没有使用，默认传值0就好。第一个参数表示队列的优先级，其中优先级主要分为4种。
+
+* DISPATCH_QUEUE_PRIORITY_HIGH 2，优先级高
+* DISPATCH_QUEUE_PRIORITY_DEFAULT 0，默认优先级，中
+* DISPATCH_QUEUE_PRIORITY_LOW -2，优先级低
+* DISPATCH_QUEUE_PRIORITY_BACKGROUND INT16_MIN，后台模式，优先级最低
+
+		dispatch_queue_t globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+		
+#### 2.3、创建自定义的队列
+
+创建自定义的队列主要有两种，一种是串行队列，一种是并行队列。在创建自定义队列时会需要传两个参数，第一个为队列的名称，第二个为表示队列类型的常量（串行还是并行）。
+
+	DISPATCH_QUEUE_SERIAL //串行队列
+	//串行队列
+    dispatch_queue_t serialQueue = dispatch_queue_create("com.lysongzi.serial", DISPATCH_QUEUE_SERIAL);
+    
+	DISPATCH_QUEUE_CONCURRENT //并行队列
+	//并行队列
+    dispatch_queue_t concurrentQueue = dispatch_queue_create("com.lysongzi.concurrent", DISPATCH_QUEUE_CONCURRENT);
+    
+### 3、同步&异步
+
+创建好队列, 然后把任务添加到队列中, 这里牵涉到同步或者异步两种方式
+
+* 串行队列
+
+	* 同步, 其会在当前线程立即执行添加的任务
+	* 异步, 其会新创建一个新的线程来执行任务(只有一个)
+
+
+			-(void)testSerialQueue
+    		{
+		        //创建串行队列,传入参数为DISPATCH_QUEUE_SERIAL
+		        self.serialQueue = dispatch_queue_create("com.lysongzi.serial", DISPATCH_QUEUE_SERIAL);
+		
+		        //同步执行队列中的任务，会立即在当前线程执行该任务
+		        dispatch_sync(self.serialQueue, ^{
+		            NSLog(@"这里是同步执行的串行队列01。===> %@", [NSThread currentThread]);
+		        });
+		
+		        //异步执行任务，会新开一个线程，多个任务按顺序执行
+		        dispatch_async(self.serialQueue, ^{
+		            for (int i = 0; i < 3; i++) {
+		                NSLog(@"串行01 ===> %d ===> %@", i, [NSThread currentThread]);
+		            }
+		        });
+		
+		        dispatch_sync(self.serialQueue, ^{
+		            NSLog(@"这里是同步执行的串行队列02。===> %@", [NSThread currentThread]);
+		        });
+		
+		        dispatch_async(self.serialQueue, ^{
+		            for (int i = 0; i < 3; i++) {
+		                NSLog(@"串行02 ===> %d ===> %@", i, [NSThread currentThread]);
+		            }
+		        });
+		
+		        dispatch_async(self.serialQueue, ^{
+		            for (int i = 0; i < 3; i++) {
+		                NSLog(@"串行03 ===> %d ===> %@", i, [NSThread currentThread]);
+		            }
+		        });
+		    }
+		    
+看一下输出结果。我们会发现使用同步方式执行的任务都会被立即执行，并且是在当前线程（主线程）中执行的。而用异步方式的任务则会在新创建的线程(number=2)中执行，并且它们是按照一定顺序执行的（串行01->串行02->串行03）。
+
+		2016-03-20 20:17:34.123 Demo[4084:422492] 这里是同步执行的串行队列01。===> <NSThread: 0x100103080>{number = 1, name = main}
+		2016-03-20 20:17:34.125 Demo[4084:422514] 串行01 ===> 0 ===> <NSThread: 0x100103a70>{number = 2, name = (null)}
+		2016-03-20 20:17:34.125 Demo[4084:422514] 串行01 ===> 1 ===> <NSThread: 0x100103a70>{number = 2, name = (null)}
+		2016-03-20 20:17:34.125 Demo[4084:422514] 串行01 ===> 2 ===> <NSThread: 0x100103a70>{number = 2, name = (null)}
+		2016-03-20 20:17:34.126 Demo[4084:422492] 这里是同步执行的串行队列02。===> <NSThread: 0x100103080>{number = 1, name = main}
+		2016-03-20 20:17:34.746 Demo[4084:422514] 串行02 ===> 0 ===> <NSThread: 0x100103a70>{number = 2, name = (null)}
+		2016-03-20 20:17:34.746 Demo[4084:422514] 串行02 ===> 1 ===> <NSThread: 0x100103a70>{number = 2, name = (null)}
+		2016-03-20 20:17:34.746 Demo[4084:422514] 串行02 ===> 2 ===> <NSThread: 0x100103a70>{number = 2, name = (null)}
+		2016-03-20 20:17:34.746 Demo[4084:422514] 串行03 ===> 0 ===> <NSThread: 0x100103a70>{number = 2, name = (null)}
+		2016-03-20 20:17:34.746 Demo[4084:422514] 串行03 ===> 1 ===> <NSThread: 0x100103a70>{number = 2, name = (null)}
+		2016-03-20 20:17:34.746 Demo[4084:422514] 串行03 ===> 2 ===> <NSThread: 0x100103a70>{number = 2, name = (null)}
+
+* 并发队列
+	
+	* 同步, 任务在当前线程立即执行
+	* 异步, 任务都会放到新创建的线程, 如果线程中任务没有执行完成, 新任务会另开新的线程, 不按顺序执行, 有执行完的会放到已执行完线程执行, 合理利用线程.
+	
+			-(void)testConcurrentQueue
+		    {
+		        //创建并发队列，传入参数为DISPATCH_QUEUE_CONCURRENT
+		        self.concurrentQueue = dispatch_queue_create("com.lysongzi.concurrent", DISPATCH_QUEUE_CONCURRENT);
+	
+		        //同步执行队列中的任务，会立即执行该任务
+		        dispatch_sync(self.concurrentQueue, ^{
+		            for (int i = 0; i < 3; i++) {
+		                NSLog(@"并发同步01 ===> %d ===> %@", i, [NSThread currentThread]);
+		            }
+		        });
+		
+		        dispatch_sync(self.concurrentQueue, ^{
+		            for (int i = 0; i < 3; i++) {
+		                NSLog(@"并发同步02 ===> %d ===> %@", i, [NSThread currentThread]);
+		            }
+		        });
+		
+		        //异步执行并发队列
+		        dispatch_async(self.concurrentQueue, ^{
+		            for (int i = 0; i < 5; i++) {
+		                NSLog(@"并发异步01 ===> %d ===> %@", i, [NSThread currentThread]);
+		            }
+		        });
+		
+		        dispatch_async(self.concurrentQueue, ^{
+		            for (int i = 0; i < 5; i++) {
+		                NSLog(@"并发异步02 ===> %d ===> %@", i, [NSThread currentThread]);
+		            }
+		        });
+		
+		        dispatch_async(self.concurrentQueue, ^{
+		            for (int i = 0; i < 5; i++) {
+		                NSLog(@"并发异步03 ===> %d ===> %@", i, [NSThread currentThread]);
+		            }
+		        });
+	    	}
+
+	
+结果如下所示, 开辟了3个线程, 当线程2的任务执行完成之后,会执行接下来并发执行的任务
+
+		2016-02-20 20:52:18.376 Demo[4223:436777] 并发同步01 ===> 0 ===> <NSThread: 0x100108c80>{number = 1, name = main}
+		2016-02-20 20:52:18.377 Demo[4223:436777] 并发同步01 ===> 1 ===> <NSThread: 0x100108c80>{number = 1, name = main}
+		2016-02-20 20:52:18.377 Demo[4223:436777] 并发同步01 ===> 2 ===> <NSThread: 0x100108c80>{number = 1, name = main}
+		2016-02-20 20:52:18.377 Demo[4223:436777] 并发同步02 ===> 0 ===> <NSThread: 0x100108c80>{number = 1, name = main}
+		2016-02-20 20:52:18.377 Demo[4223:436777] 并发同步02 ===> 1 ===> <NSThread: 0x100108c80>{number = 1, name = main}
+		2016-02-20 20:52:18.377 Demo[4223:436777] 并发同步02 ===> 2 ===> <NSThread: 0x100108c80>{number = 1, name = main}
+		2016-02-20 20:52:18.378 Demo[4223:436826] 并发异步03 ===> 0 ===> <NSThread: 0x100700110>{number = 3, name = (null)}
+		2016-02-20 20:52:18.378 Demo[4223:436826] 并发异步03 ===> 1 ===> <NSThread: 0x100700110>{number = 3, name = (null)}
+		2016-02-20 20:52:18.378 Demo[4223:436825] 并发异步02 ===> 0 ===> <NSThread: 0x1002000a0>{number = 2, name = (null)}
+		2016-02-20 20:52:18.378 Demo[4223:436826] 并发异步03 ===> 2 ===> <NSThread: 0x100700110>{number = 3, name = (null)}
+		2016-02-20 20:52:18.378 Demo[4223:436825] 并发异步02 ===> 1 ===> <NSThread: 0x1002000a0>{number = 2, name = (null)}
+		2016-02-20 20:52:18.378 Demo[4223:436826] 并发异步03 ===> 3 ===> <NSThread: 0x100700110>{number = 3, name = (null)}
+		2016-02-20 20:52:18.378 Demo[4223:436825] 并发异步02 ===> 2 ===> <NSThread: 0x1002000a0>{number = 2, name = (null)}
+		2016-02-20 20:52:18.378 Demo[4223:436826] 并发异步03 ===> 4 ===> <NSThread: 0x100700110>{number = 3, name = (null)}
+		2016-02-20 20:52:18.379 Demo[4223:436824] 并发异步01 ===> 0 ===> <NSThread: 0x10010aec0>{number = 4, name = (null)}
+		2016-02-20 20:52:18.384 Demo[4223:436825] 并发异步02 ===> 3 ===> <NSThread: 0x1002000a0>{number = 2, name = (null)}
+		2016-02-20 20:52:18.384 Demo[4223:436824] 并发异步01 ===> 1 ===> <NSThread: 0x10010aec0>{number = 4, name = (null)}
+		2016-02-20 20:52:18.384 Demo[4223:436825] 并发异步02 ===> 4 ===> <NSThread: 0x1002000a0>{number = 2, name = (null)}
+		2016-02-20 20:52:18.384 Demo[4223:436824] 并发异步01 ===> 2 ===> <NSThread: 0x10010aec0>{number = 4, name = (null)}
+		2016-02-20 20:52:18.384 Demo[4223:436824] 并发异步01 ===> 3 ===> <NSThread: 0x10010aec0>{number = 4, name = (null)}
+		2016-02-20 20:52:18.384 Demo[4223:436824] 并发异步01 ===> 4 ===> <NSThread: 0x10010aec0>{number = 4, name = (null)}
+		
+**tips**: 1.主线程中同步执行会卡死
+
+	dispatch_sync(dispatch_get_main_queue(), ^{});
+		
+参考资料
+
+* [GCD实践——串行队列/并发队列与iOS多线程详解](http://blog.csdn.net/CHENYUFENG1991/article/details/49332547)
+* [iOS-多线程编程学习之GCD——串行队列和并发队列](http://blog.csdn.net/linyousong/article/details/50753959)
