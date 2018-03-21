@@ -1,0 +1,18 @@
+---
+layout: post
+title: 优化iPhone存储空间惹的祸
+
+date: 2018-03-21 19:21:22.000000000 +09:00
+---
+
+昨日偶然发现商品发布失败，最先想到是接口挂了，抓包log如下：
+
+![](https://s3.mogucdn.com/mlcdn/c45406/180321_6k441cl6ck4b8ak9fl3c75e277hci_912x204.jpg)
+
+查了下资料, 说是上传文件或者格式的问题，而该问题之前未出现，格式问题可以排除。调试了源码发现图片尺寸是有的，但是返回的result为nil，如下：
+
+![](https://s3.mogucdn.com/mlcdn/c45406/180321_410a6d87fa690dcbi567hia93ej38_2222x624.jpg)
+
+原因找到了，按照这个方向查下去，结论浮出水面，原来iOS8之后，PHImageRequestOptions增加了networkAccessAllowed这个属性，是否允许从iCloud下载图片，默认为NO。。。
+
+这才想起来前几天手机设置了优化iPhone存储空间，至此真相大白。
