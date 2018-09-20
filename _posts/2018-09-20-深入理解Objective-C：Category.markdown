@@ -14,6 +14,7 @@ date: 2018-03-21 19:21:22.000000000 +09:00
 本文系学习Objective-C的runtime源码时整理所成，主要剖析了category在runtime层的实现原理以及和category相关的方方面面，内容包括：
 
 ### 1、初入宝地-category简介
+
 category是Objective-C 2.0之后添加的语言特性，category的主要作用是为已经存在的类添加方法。除此之外，apple还推荐了category的另外两个使用场景1
 
 可以把类的实现分开在几个不同的文件里面。这样做有几个显而易见的好处，a)可以减少单个文件的体积 b)可以把不同的功能组织到不同的category里 c)可以由多个开发者共同完成一个类 d)可以按需加载想要的category 等等。
@@ -25,20 +26,22 @@ category是Objective-C 2.0之后添加的语言特性，category的主要作用�
 Objective-C的这个语言特性对于纯动态语言来说可能不算什么，比如javascript，你可以随时为一个“类”或者对象添加任意方法和实例变量。但是对于不是那么“动态”的语言而言，这确实是一个了不起的特性。
 
 ### 2、连类比事-category和extension
-extension看起来很像一个匿名的category，但是extension和有名字的category几乎完全是两个东西。 extension在编译期决议，它就是类的一部分，在编译期和头文件里的@interface以及实现文件里的@implement一起形成一个完整的类，它伴随类的产生而产生，亦随之一起消亡。extension一般用来隐藏类的私有信息，你必须有一个类的源码才能为一个类添加extension，所以你无法为系统的类比如NSString添加extension。（详见2）
+
+extension看起来很像一个匿名的category，但是extension和有名字的category几乎完全是两个东西。 extension在编译期决议，它就是类的一部分，在编译期和头文件里的@interface以及实现文件里的@implement一起形成一个完整的类，它伴随类的产生而产生，亦随之一起消亡。extension一般用来隐藏类的私有信息，你必须有一个类的源码才能为一个类添加extension，所以你无法为系统的类比如NSString添加extension。
 
 但是category则完全不一样，它是在运行期决议的。
 就category和extension的区别来看，我们可以推导出一个明显的事实，extension可以添加实例变量，而category是无法添加实例变量的（因为在运行期，对象的内存布局已经确定，如果添加实例变量就会破坏类的内部布局，这对编译型语言来说是灾难性的）。
 
 ### 3、挑灯细览-category真面目
+
 我们知道，所有的OC类和对象，在runtime层都是用struct表示的，category也不例外，在runtime层，category用结构体category_t（在objc-runtime-new.h中可以找到此定义），它包含了
 
-	1、类的名字（name）
-	2、类（cls）
-	3、category中所有给类添加的实例方法的列表（instanceMethods）
-	4、category中所有添加的类方法的列表（classMethods）
-	5、category实现的所有协议的列表（protocols）
-	6、category中添加的所有属性（instanceProperties）
+1、类的名字（name）
+2、类（cls）
+3、category中所有给类添加的实例方法的列表（instanceMethods）
+4、category中所有添加的类方法的列表（classMethods）
+5、category实现的所有协议的列表（protocols）
+6、category中添加的所有属性（instanceProperties）
 
 	typedef struct category_t {
 	    const char *name;
@@ -48,10 +51,11 @@ extension看起来很像一个匿名的category，但是extension和有名字的
 	    struct protocol_list_t *protocols;
 	    struct property_list_t *instanceProperties;
 	} category_t;
+	
 从category的定义也可以看出category的可为（可以添加实例方法，类方法，甚至可以实现协议，添加属性）和不可为（无法添加实例变量）。
 ok，我们先去写一个category看一下category到底为何物：
 
-MyClass.h：
+	MyClass.h：
 
 	#import <Foundation/Foundation.h>
 	
@@ -68,6 +72,7 @@ MyClass.h：
 	- (void)printName;
 	
 	@end
+	
 	MyClass.m：
 
 	#import "MyClass.h"
@@ -89,6 +94,7 @@ MyClass.h：
 	}
 	
 	@end
+	
 我们使用clang的命令去看看category到底会变成什么：
 
 clang -rewrite-objc MyClass.m
@@ -141,12 +147,13 @@ clang -rewrite-objc MyClass.m
 	static struct _category_t *L_OBJC_LABEL_CATEGORY_$ [1] __attribute__((used, section ("__DATA, __objc_catlist,regular,no_dead_strip")))= {
 	&_OBJC_$_CATEGORY_MyClass_$_MyAddition,
 	};
+	
 我们可以看到，
-#####1)、首先编译器生成了实例方法列表OBJC$_CATEGORY_INSTANCE_METHODSMyClass$_MyAddition和属性列表OBJC$_PROP_LISTMyClass$_MyAddition，两者的命名都遵循了公共前缀+类名+category名字的命名方式，而且实例方法列表里面填充的正是我们在MyAddition这个category里面写的方法printName，而属性列表里面填充的也正是我们在MyAddition里添加的name属性。还有一个需要注意到的事实就是category的名字用来给各种列表以及后面的category结构体本身命名，而且有static来修饰，所以在同一个编译单元里我们的category名不能重复，否则会出现编译错误。
+1)、首先编译器生成了实例方法列表OBJC$_CATEGORY_INSTANCE_METHODSMyClass$_MyAddition和属性列表OBJC$_PROP_LISTMyClass$_MyAddition，两者的命名都遵循了公共前缀+类名+category名字的命名方式，而且实例方法列表里面填充的正是我们在MyAddition这个category里面写的方法printName，而属性列表里面填充的也正是我们在MyAddition里添加的name属性。还有一个需要注意到的事实就是category的名字用来给各种列表以及后面的category结构体本身命名，而且有static来修饰，所以在同一个编译单元里我们的category名不能重复，否则会出现编译错误。
 
-##### 2)、其次，编译器生成了category本身OBJC$_CATEGORYMyClass$_MyAddition，并用前面生成的列表来初始化category本身。
+2)、其次，编译器生成了category本身OBJC$_CATEGORYMyClass$_MyAddition，并用前面生成的列表来初始化category本身。
 
-##### 3)、最后，编译器在DATA段下的objc_catlist section里保存了一个大小为1的category_t的数组L_OBJC_LABELCATEGORY$（当然，如果有多个category，会生成对应长度的数组^_^），用于运行期category的加载。
+3)、最后，编译器在DATA段下的objc_catlist section里保存了一个大小为1的category_t的数组L_OBJC_LABELCATEGORY$（当然，如果有多个category，会生成对应长度的数组^_^），用于运行期category的加载。
 到这里，编译器的工作就接近尾声了，对于category在运行期怎么加载，我们下节揭晓。
 
 ### 4、追本溯源-category如何加载
