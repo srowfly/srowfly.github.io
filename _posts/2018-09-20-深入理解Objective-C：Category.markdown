@@ -37,10 +37,15 @@ extension看起来很像一个匿名的category，但是extension和有名字的
 我们知道，所有的OC类和对象，在runtime层都是用struct表示的，category也不例外，在runtime层，category用结构体category_t（在objc-runtime-new.h中可以找到此定义），它包含了
 
 1、类的名字（name）
+
 2、类（cls）
+
 3、category中所有给类添加的实例方法的列表（instanceMethods）
+
 4、category中所有添加的类方法的列表（classMethods）
+
 5、category实现的所有协议的列表（protocols）
+
 6、category中添加的所有属性（instanceProperties）
 
 	typedef struct category_t {
