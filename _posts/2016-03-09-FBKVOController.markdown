@@ -44,4 +44,4 @@ date: 2016-03-09 18:32:24.000000000 +09:00
 
 ![Alt text](/assets/images/kvo_sixth.jpg)
 
-总结: 小弟目前只对FBKVOController的使用方法及流程有了初步的了解, 具体实现还不是很熟悉, 下次补全~!
+总结: 目前只对FBKVOController的使用方法及流程有了初步的了解, 具体实现还不是很熟悉, 下次补全~!
